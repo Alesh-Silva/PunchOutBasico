@@ -27,14 +27,14 @@ round_atual, nivel_ia = 1, 1.0
 historico = deque([0, 1, 0], maxlen=3)
 p_hp, p_estado, p_timer, cooldown, stamina = 100, "neutro", 0, 0, 5
 e_hp, e_estado, e_timer, e_ataque_timer = 100, "neutro", 0, 80
-bloqueios_seguidos, msg, msg_timer, vencedor = 0, "Round 1! Lute!", 40, ""
+bloqueios_seguidos, msg, msg_timer, vencedor, ultimo_contra = 0, "Round 1! Lute!", 40, "", None
 
 def reiniciar_round():
     global p_hp, p_estado, p_timer, cooldown, stamina, e_hp, e_estado, e_timer, e_ataque_timer
-    global bloqueios_seguidos, round_atual, nivel_ia, msg, msg_timer, vencedor, historico
+    global bloqueios_seguidos, round_atual, nivel_ia, msg, msg_timer, vencedor, historico, ultimo_contra
     p_hp, p_estado, p_timer, cooldown, stamina = 100, "neutro", 0, 0, 5
     e_hp, e_estado, e_timer = 100, "neutro", 0
-    bloqueios_seguidos = 0
+    bloqueios_seguidos, ultimo_contra = 0, None
     
     if "NOCAUTEADO" in vencedor:
         round_atual, nivel_ia = 1, 1.0
@@ -66,13 +66,15 @@ while True:
                     historico.append(acao)
 
                     if e_estado == "aberto":
-                        # IA desvia de contra-ataques a partir do nivel 3.0x
-                        chance_esquiva_contra = min(0.90, 0.35 + (nivel_ia - 3.0) * 0.55) if nivel_ia >= 3.0 and pred == acao else 0
-                        if np.random.rand() < chance_esquiva_contra:
+                        # IA aprende a desviar de contra-ataques a partir de 3.0x
+                        repetiu = (acao == ultimo_contra)
+                        chance = (0.55 if repetiu else 0.25) + (nivel_ia - 3.0) * 0.35 if nivel_ia >= 3.0 else 0
+                        if np.random.rand() < min(0.95, chance):
                             e_estado, e_timer, msg, msg_timer = "esquiva", 18, "IA Desviou do Contra-ataque!", 25
                         else:
                             e_hp -= 15
                             msg, msg_timer, bloqueios_seguidos = "Contra-ataque! -15", 25, 0
+                        ultimo_contra = acao
                     elif e_estado in ["neutro", "defesa"]:
                         if pred == acao and np.random.rand() < min(0.75, 0.25 * nivel_ia):
                             e_estado, e_timer, msg, msg_timer = "esquiva", 18, "IA Esquivou!", 25
