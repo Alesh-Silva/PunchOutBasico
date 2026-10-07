@@ -103,22 +103,22 @@ Todos os gráficos foram exportados em alta resolução (300 DPI) na pasta `graf
 
 O jogo desenvolvido (`punch_out_game.py`) aplica os conceitos clássicos de combate rítmico do arcade *Punch-Out!!*:
 
-### 6.1. Guarda Neutra e Punição a Spam
-- O adversário permanece em guarda alta por padrão. Golpes desferidos fora de hora são **bloqueados** (dano 0).
-- Tentativas de insistência cega (spammear ataques na guarda) resultam em contra-golpe punitivo automático do adversário.
+### 6.1. Guarda Neutra, Punição a Spam e Stamina
+- O adversário permanece em guarda alta por padrão, bloqueando ataques desferidos no neutro.
+- O jogador dispõe de **5 pontos de stamina** que decaem a cada golpe bloqueado. Se a stamina esgotar, o jogador sofre um contra-golpe punitivo automático do adversário. A stamina restaura para 5 sempre que o jogador recebe dano.
 
 ### 6.2. Janela de Contra-Ataque (Core Loop)
 - O oponente sinaliza previamente seus ataques piscando em **amarelo** (*telegraph*).
 - O jogador deve reagir esquivando com precisão (`ESPAÇO`).
-- Ao errar o soco, o oponente fica **aberto e vulnerável** (cor alaranjada com braços abaixados) por uma janela de tempo curta. É exclusivamente nesta janela que os socos do jogador causam dano efetivo (`-15 HP`).
+- Ao errar o soco, o oponente fica **aberto e vulnerável** (cor alaranjada com braços abaixados) por uma fração de segundo, abrindo a oportunidade de contra-ataque do jogador.
 
-### 6.3. Previsão da IA e Esquiva Dinâmica
-- Caso o jogador tente atacar fora do momento de abertura, a Árvore de Decisão analisa o histórico recente de golpes e prevê a ação. Se a previsão for correta, o oponente **esquiva lateralmente e desfere um contra-ataque** (`"IA Esquivou e Bateu!"`).
+### 6.3. Previsão da IA e Esquiva de Contra-Ataques
+- Caso o jogador ataque fora de hora, a Árvore de Decisão prevê o golpe e esquiva/contra-ataca.
+- **Evolução a partir do Nível 3.0x:** O oponente passa a ser capaz de prever e desviar até mesmo das tentativas de contra-ataque do jogador durante a janela de abertura, chegando a alta precisão evasiva ao atingir o Nível 4.0x.
 
-### 6.4. Progressão por Restart (Avanço de Rounds)
-- A cada reinício de partida com a tecla `R`:
-  - O contador avança para o próximo Round (`Round 1` $\rightarrow$ `Round 2` $\rightarrow$ `Round 3`...).
-  - O nível de adaptação da IA aumenta (`1.0x`, `1.5x`, `2.0x`...), tornando o adversário mais rápido, reduzindo o tempo de aviso prévio e tornando as esquivas e contra-golpes da IA muito mais afiados.
+### 6.4. Progressão por Rounds e Reinício em Derrota
+- Em caso de vitória, ao pressionar `R`, avança-se para o próximo Round (`Round 1` $\rightarrow$ `Round 2`...), aumentando o nível da IA (`1.0x`, `1.5x`, `2.0x`...).
+- Caso o jogador seja **nocauteado**, o sistema reseta a partida de volta ao **Round 1 (Nível 1.0x)** e limpa a memória de aprendizado recente do oponente.
 
 ---
 
